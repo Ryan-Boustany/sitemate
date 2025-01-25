@@ -6,6 +6,7 @@ const TableWithModal = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [rows, setRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchHistory, setSearchHistory] = useState([]);
 
   const fetchNews = async () => {
     const apiKey = "183daca270264bad86fc5b72972fb82a";
@@ -21,6 +22,7 @@ const TableWithModal = () => {
           name: article.title || "No Title",
           author: article.author || "Unknown Author",
           content: article.content || "No Content Available",
+          imageUrl: article.urlToImage || "https://via.placeholder.com/150",
         }));
         setRows(formattedRows);
       }
@@ -37,6 +39,23 @@ const TableWithModal = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedRow(null);
+  };
+
+  const handleSearchBlur = () => {
+    if (searchTerm.trim() && !searchHistory.includes(searchTerm)) {
+      setSearchHistory((prevHistory) => {
+        const newHistory = [...prevHistory, searchTerm];
+        return newHistory.slice(-5); // Keep only the most recent 5 searches
+      });
+    }
+  };
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleHistoryClick = (term) => {
+    setSearchTerm(term);
   };
 
   const filteredRows = rows.filter((row) =>
@@ -58,14 +77,26 @@ const TableWithModal = () => {
             fullWidth
             className="mb-4"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearch}
+            onBlur={handleSearchBlur}
           />
+          <div style={{ marginBottom: "16px" }}>
+            <h2>Search History:</h2>
+            <ul>
+              {searchHistory.map((term, index) => (
+                <li key={index}>
+                  <Button variant="text" onClick={() => handleHistoryClick(term)}>{term}</Button>
+                </li>
+              ))}
+            </ul>
+          </div>
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
                 <TableRow>
                   <TableCell>ID</TableCell>
                   <TableCell>Title</TableCell>
+                  <TableCell>Image</TableCell>
                   <TableCell>Author</TableCell>
                   <TableCell>Action</TableCell>
                 </TableRow>
@@ -75,6 +106,9 @@ const TableWithModal = () => {
                   <TableRow key={row.id}>
                     <TableCell>{row.id}</TableCell>
                     <TableCell>{row.name}</TableCell>
+                    <TableCell>
+                      <img src={row.imageUrl} alt={row.name} style={{ width: "100px", height: "auto" }} />
+                    </TableCell>
                     <TableCell>{row.author}</TableCell>
                     <TableCell>
                       <Button variant="contained" onClick={() => handleOpenModal(row)}>
@@ -97,6 +131,7 @@ const TableWithModal = () => {
               <p><strong>Title:</strong> {selectedRow.name}</p>
               <p><strong>Author:</strong> {selectedRow.author}</p>
               <p><strong>Content:</strong> {selectedRow.content}</p>
+              <img src={selectedRow.imageUrl} alt={selectedRow.name} style={{ marginTop: "16px", maxWidth: "100%" }} />
             </div>
           )}
         </DialogContent>
@@ -109,3 +144,4 @@ const TableWithModal = () => {
 };
 
 export default TableWithModal;
+
