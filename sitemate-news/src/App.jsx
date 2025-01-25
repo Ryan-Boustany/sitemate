@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Button, Card, CardContent, Dialog, DialogTitle, DialogActions, DialogContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import { Button, Card, CardContent, Dialog, DialogTitle, DialogActions, DialogContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField } from "@mui/material";
 
 const TableWithModal = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [rows, setRows] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchNews = async () => {
     const apiKey = "183daca270264bad86fc5b72972fb82a";
@@ -38,14 +39,27 @@ const TableWithModal = () => {
     setSelectedRow(null);
   };
 
+  const filteredRows = rows.filter((row) =>
+    row.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="p-4">
       <Card className="rounded-2xl shadow-lg">
         <CardContent>
           <h1 className="text-xl font-bold mb-4">Latest News</h1>
-          <Button variant="contained" onClick={fetchNews} className="mb-4">
+          <Button variant="contained" onClick={fetchNews} className="mb-2">
             Fetch News
           </Button>
+          <div style={{ marginBottom: "16px" }}></div>
+          <TextField
+            label="Search by Title"
+            variant="outlined"
+            fullWidth
+            className="mb-4"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
@@ -57,7 +71,7 @@ const TableWithModal = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row) => (
+                {filteredRows.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell>{row.id}</TableCell>
                     <TableCell>{row.name}</TableCell>
